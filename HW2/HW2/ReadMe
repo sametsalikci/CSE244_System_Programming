@@ -1,0 +1,18 @@
+Description : Bu program bir klasorun altindaki tum dosyalari bulur,
+              her buldugu dosyayi forklar.Daha sonra forklanan dosyalardaki
+              kelime sayisini bulur.(harf disinda karekter icermeyen kelimeler).
+              Dosyalardaki tum kelime sayisinin toplamini bulur.
+
+
+Input		: ./dosyaAdi KlasorAdi
+
+Output		:  +Tum dosylardaki kelime sayisi
+					-> pid,dosyaAdi,kelimeSaysi
+				seklinde tum dosya ve icindeki kelime sayisi ile forkun child pidi
+				yazilir.
+
+				+Dosyanin sonuna:
+				->Toplam klasor sayisi
+				->Toplam dosya sayisi
+				->Toplam child sayisi
+				->Toplam kelime sayisi yazilir.

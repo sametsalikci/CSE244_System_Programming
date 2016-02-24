@@ -1,0 +1,17 @@
+Description : Bu program bir klasorun altindaki tum dosyalari bulur,
+              her buldugu dosya için thread yapar.Daha sonra dosyalardaki
+              kelime sayisini bulur.(harf disinda karekter icermeyen kelimeler).
+              Dosyalardaki tum kelime sayisinin toplamini bulur.
+
+
+Input		: ./dosyaAdi KlasorAdi
+
+Output		:  +Tum dosylardaki kelime sayisi
+					-> thread,dosyaAdi,kelimeSaysi
+				seklinde tum dosya ve icindeki kelime sayisi var
+
+				+Dosyanin içinde:
+				->Toplam klasor sayisi
+				->Toplam dosya sayisi
+				->Toplam thread sayisi
+				->Toplam kelime sayisi şeklinde olacak
