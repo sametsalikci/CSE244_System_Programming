@@ -99,7 +99,6 @@ char*fnIgnoreBackSlashN(char *cptrStr,int iNumberSize);
 Book*fnCombineAllOfWords(Book *ptrsBook,int iNumberSize,int *iptrNewsize);
 int fnGetWordNumber(Book*ptrsBook,char*ptrSearchStr,int iSize,int*iptrWordCount,int iStart);
 void*fnReturnWordCount(void*arg);
-void f(char*file);
 /*----------------------------------------------------------------------------*/
 //                                MAIN FUNCTION 
 /*----------------------------------------------------------------------------*/
@@ -164,51 +163,51 @@ int main(int argc, char const *argv[])
         getPathFileInDirectory(root, "",pfOutputFile,&piDirSize);
         fclose(pfOutputFile);
 
-        // if(( pfInputFile = fopen("FilePathRoot.txt","r")) == NULL){
-        //     printf("Failed to open file for reading!! \n");
-        //     return 0;
-        // } 
+        if(( pfInputFile = fopen("FilePathRoot.txt","r")) == NULL){
+            printf("Failed to open file for reading!! \n");
+            return 0;
+        } 
 
-        // iRowSizeInFile = fnFindRowNumber(pfInputFile);
-        // rewind(pfInputFile);
-        // MyThreadStruct *stThread = (MyThreadStruct*)malloc(sizeof(MyThreadStruct) * iRowSizeInFile);
-        // int i;
-        // pthread_t thread[iRowSizeInFile];
-        // char cptrStr[PATH_MAX];
+        iRowSizeInFile = fnFindRowNumber(pfInputFile);
+        rewind(pfInputFile);
+        MyThreadStruct *stThread = (MyThreadStruct*)malloc(sizeof(MyThreadStruct) * iRowSizeInFile);
+        int i;
+        pthread_t thread[iRowSizeInFile];
+        char cptrStr[PATH_MAX];
         
-        // for ( i = 0; i < iRowSizeInFile; ++i)
-        // {   
-        //     memset(cptrStr,'\0', PATH_MAX * sizeof(char));
-        //     memset(stThread[i].chFilePath,'\0',PATH_MAX * sizeof(char));
-        //     fgets(cptrStr, PATH_MAX, pfInputFile);
-        //     strncpy(stThread[i].chFilePath,cptrStr,strnlen(cptrStr, PATH_MAX)-1);     
-        // }
-        // if(sem_init(&semafor,0,1) == -1)
-        //     perror("Failed to initialize semafor");
-        // int iError;
-        // for (i = 0; i < iRowSizeInFile; ++i)
-        // {
-        //     sem_wait(&semafor);
-        //     if (iError = pthread_create(&thread[i],NULL,fnReturnWordCount,&stThread[i]))
-        //     {
-        //       fprintf(stderr, "Failed to create thread %d: %s\n",i+1,strerror(iError));
-        //     }
-        //     sem_post(&semafor);    
-        // }
+        for ( i = 0; i < iRowSizeInFile; ++i)
+        {   
+            memset(cptrStr,'\0', PATH_MAX * sizeof(char));
+            memset(stThread[i].chFilePath,'\0',PATH_MAX * sizeof(char));
+            fgets(cptrStr, PATH_MAX, pfInputFile);
+            strncpy(stThread[i].chFilePath,cptrStr,strnlen(cptrStr, PATH_MAX)-1);     
+        }
+        if(sem_init(&semafor,0,1) == -1)
+            perror("Failed to initialize semafor");
+        int iError;
+        for (i = 0; i < iRowSizeInFile; ++i)
+        {
+            sem_wait(&semafor);
+            if (iError = pthread_create(&thread[i],NULL,fnReturnWordCount,&stThread[i]))
+            {
+              fprintf(stderr, "Failed to create thread %d: %s\n",i+1,strerror(iError));
+            }
+            sem_post(&semafor);    
+        }
 
-        // for (i = 0; i < iRowSizeInFile; ++i)
-        // {   
-        //     if (iError = pthread_join(thread[i],NULL))
-        //     {   
-        //         fprintf(stderr, "Failed to join thread\n");
-        //         continue;
-        //     }
-        //     printf("\nFileName : %s\n",stThread[i].chFilePath);
-        //     printf("Execution Time: %.6lf miliseconds.\n", stThread[i].iMilSec);      
-        // }
-        // if(sem_destroy(&semafor) == -1)
-        //     perror("Failed to destroy semafor");
-        int iNumber = 0,i;
+        for (i = 0; i < iRowSizeInFile; ++i)
+        {   
+            if (iError = pthread_join(thread[i],NULL))
+            {   
+                fprintf(stderr, "Failed to join thread\n");
+                continue;
+            }
+            printf("\nFileName : %s\n",stThread[i].chFilePath);
+            printf("Execution Time: %.6lf miliseconds.\n", stThread[i].iMilSec);      
+        }
+        if(sem_destroy(&semafor) == -1)
+            perror("Failed to destroy semafor");
+        int iNumber = 0;
         int iTotalWordsNumber = 0;
         printf("iIndexTotalWord:%d\n",iIndexTotalWord);
         Book*ptrsTemp = fnCombineAllOfWords(stGlobalArray,iIndexTotalWord,&iNumber);
@@ -223,7 +222,7 @@ int main(int argc, char const *argv[])
         fclose(pfInputFile);
         remove("FilePathRoot.txt");
         free(ptrsTemp);
-        //free(stThread);
+        free(stThread);
     }
     fclose(pfLogFile);   
     gettimeofday(&endTime, NULL);
@@ -232,75 +231,6 @@ int main(int argc, char const *argv[])
     printf("\nExecution Time: %.3lf miliseconds\n", miliSecTime);
     
     return 0;
-}
-void f(char*file){
-
-    FILE*pfLogFile= NULL;
-    FILE*pfOutputFile,*pfInputFile;
-    int iRowSizeInFile;
-    pid_t pidChildPid;
-    struct timeval startTime, endTime;
-    double miliSecTime;
-    char root[MAX_PATH]={0x0};
-    char path[MAX_PATH]={0x0};
-    int icharNumber;
-    char*cptrLineString;
-    FILE*pfTempFile;
-    int iCurrWordSize;
-    int iTotalWordsSize;
-    FILE*pfProgramOutput;
-    int iStatus;
-    FILE*pfHoldWordSizeFile;
-    int piDirSize = 0;
-    FILE*pfLogFileOutput;
-    Book*ptrsBook;
-    int iIndex;
-    int iFifo;
-    int iFileCount = 0;
-    int iTempCount = 0;
-    int waitStatus;
-
-
-    MyThreadStruct *stThread = (MyThreadStruct*)malloc(sizeof(MyThreadStruct));
-    int i;
-    pthread_t thread;
-    char cptrStr[PATH_MAX];
-    
-    for ( i = 0; i < 1; ++i)
-    {   
-        memset(cptrStr,'\0', PATH_MAX * sizeof(char));
-        memset(stThread->chFilePath,'\0',PATH_MAX * sizeof(char));
-        //fgets(cptrStr, PATH_MAX, pfInputFile);
-        strncpy(stThread->chFilePath,file,strnlen(file, PATH_MAX)-1);      
-    }
-   
-    if(sem_init(&semafor,0,1) == -1)
-        perror("Failed to initialize semafor");
-    int iError;
-    for (i = 0; i < 1; ++i)
-    {
-        sem_wait(&semafor);
-        if (iError = pthread_create(&thread,NULL,fnReturnWordCount,&stThread))
-        {
-          fprintf(stderr, "Failed to create thread %d: %s\n",i+1,strerror(iError));
-        }
-        sem_post(&semafor);    
-    }
-
-    for (i = 0; i < 1; ++i)
-    {   
-        if (iError = pthread_join(thread,NULL))
-        {   
-            fprintf(stderr, "Failed to join thread\n");
-            continue;
-        }
-        printf("\nFileName : %s\n",stThread->chFilePath);
-        printf("Execution Time: %.6lf miliseconds.\n", stThread->iMilSec);      
-    }
-    if(sem_destroy(&semafor) == -1)
-        perror("Failed to destroy semafor");
-    printf("test\n");
-    free(stThread);
 }
 /*----------------------------------------------------------------------------*/
 //
@@ -451,6 +381,9 @@ Book* fnFindTotalWordsIntheFile(char*pfFilename,int *iptrIndex){
             strcpy(ptrsBook[iTempCount].word,ptrTemp[i].word);
             ptrsBook[iTempCount].number = iIndex1;
             ++iTempCount;
+            // strcpy(stGlobalArray[iIndexTotalWord].word,ptrTemp[i].word);
+            // stGlobalArray[iIndexTotalWord].number = ptrTemp[i].number;
+            // ++iIndexTotalWord;
         }
     }
     free(ptrTemp);
@@ -684,7 +617,7 @@ int getPathFileInDirectory(char root[], char path[],FILE*filename,int*piDirSize)
                 fprintf(stdout, "Failed to fork, for directory \"%s\":%s %d\n", direntp->d_name, strerror(errno), getpid());
                 return 2;
             }
-            else if (childpid == 0){
+            else if (childpid == 0) {
 
                 if (path != "") {
 
@@ -702,6 +635,7 @@ int getPathFileInDirectory(char root[], char path[],FILE*filename,int*piDirSize)
                     exit(0);
                 }               
                 getPathFileInDirectory(newRoot, newPath,filename,piDirSize); // recursive call - sets new child's directory
+
                 exit(0); // kill child
             }
             else {
@@ -709,22 +643,14 @@ int getPathFileInDirectory(char root[], char path[],FILE*filename,int*piDirSize)
             }
         } // Directory icindeki okunan name'in filename olma durumu
         else {
-            char chPath[MAX_PATH];
-            memset(chPath,'\0',MAX_PATH * sizeof(char)); 
+
             if (path != ""){
-                sprintf(chPath,"%s/%s\n",path, direntp->d_name);
-                f(chPath);
-                fprintf(filename, "%s/%s\n",path, direntp->d_name);
-            }
-            else{ 
-                sprintf(chPath,"%s\n",direntp->d_name);
-                sprintf(chPath, "%s\n",direntp->d_name);
-                f(chPath);
-            }
-            //flush(chPath);
-            
+                fprintf(filename, "%s/%s\n",path, direntp->d_name);}
+            else fprintf(filename, "%s\n",direntp->d_name);
+                fflush(filename);
         }
     }
+
     if ( empty == 1 ) {
         fprintf(stdout, "PPid:%6d  Pid: %6d empty : %s\n", getppid(), getpid(), direntp->d_name);
         fflush(stdout);

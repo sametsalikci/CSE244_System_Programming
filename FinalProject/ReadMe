@@ -1,0 +1,90 @@
+Usage For Mine:
+
+	./mine.exe <Dir1> <Dir2> ... <DirN>
+
+   Örnek:
+	
+	./mine.exe ./ ../ / dirA/
+	
+	Not: mine.exe yi çalıştırırken klasör adının başına '/' koymayı unutmayınız.
+
+Usage For Miner:
+
+	./miner.exe <N>
+
+   Örnek:
+
+	./miner.exe 10
+
+
+
+MINE:
+
+	Algoritma:
+		-Shared memoryden Kelime Havuzu ve Dosya veya klasör path leri için yer alındı.
+		-Bu arraylerin sayılarını tutmak için,shared memoryden gerekli sayıda değişken için er ayrıldı.
+		-Semaforlar oluturuldu.
+		-Arguman olarak aldığımız klasörlerin içindeki dosya veya klasör pathleri bulundu ve bunlar daha önce ayırdığımız
+		 path struct arrayin içine koyuldu.
+		-Gerekli loglamalar yapıldı.
+		-Clientan gelecek istekler için,sonsuz bir while döngüsü oluşturuldu.
+
+MINER:
+
+	Algoritma:
+		-Mine ın ayırdığı memory bloklarına bağlanmak için,mine ve minerın bildiği ortak keyler üzerinden,miner bu bölgelere
+		 farklı keyler üzerinden bağlantı sağladı.
+		-Mine ın oluşturduğu semafora key üzerinden bağlantı.
+		-Gerekli ilklendirmeler yapıldı.
+		-Shared memoryden,istediği sayıda path almak,ve bu alınan pathlerin,dosya mı klasör mü olduğunu kontrol edildi.
+		-Bu kontrol sonucunda,file pathler bir global array ve klasör pathlerde farklı bir global arrayde tutuldu.
+		-Memorydeki path arrayini günceleyecek şelilde,miner yeni pathler serverın ayırdığı bölgeye ekledi.
+		-Meoryden alınan pathler içindeki dosya pathleri sayısı kadar thread oluşturuldu.
+		-Threadler mutex anahtarlama yöntemi ile kilitlenerek işlem sırası sağlandı.
+		-Dosyalardaki kelimeler bulundu ve bu kelimeler tek bir arrayde birleştirildi.
+		-Bulunan kelimeler havuzdaki yani serverın oluşturduğu shared memorydeki arrayin içindeki kelimeler ile kıyaslanarak,
+		 gerekl ekleme ve puan alma işlemleri yapıldı.
+		-Daha sonra kelime arrayi güncellendi.
+		-Mine bitti sinyali gönderildi.
+		
+
+KULANILAN SYSTEM MEKANİZMALARI:
+
+		-Shared Memory : kelime struct arrayi, path strcut arrayi ve diğer değişkenler için
+		-Thread        : her bir dosya için
+		-Signal        : hem server hemde client için CTRL-c sinyali handle edildi
+		-semafor       : sahered memory ulaşımını sınırlandırmak için iki farklı isimli semafor kullanıldı.
+		-Mutex         : thread içinde işlem sırası sağlamak için
+
+
+ÇALIŞMA MEKANİZMASI:
+
+		Öncelikle server farklı procceslerin de bğlanıp işlem yapması için gerekli memory aanlarını oluşturuyor.
+		Daha sonra,server kendisine verilen argumanların içindeki dosya ya da file pathleri bu ayrılan memory bloğundaki,
+		struct arrayine yazıyor.Bu işlemi tüm klasörlein altındaki pathleri bir arraye dolduracak şekilde yapıyor.
+		Bu işlemi yaptıktan sonra,clientların bağlanması için ve gerekli loglamaleı yapmak için bekliyor.
+
+		NOT: Burda server genel olarak iş yapmayacak şekilde program tasarlandı.Kendisine bağlanana her client
+		     yeteri istediği kadar maden alıp çalışmasını bitirip geerkli düznlemeyi yapıp puanını parasını alıp gidiyor.
+		     Yani mine bir işveren ve minerı bir çalışan olarak düşünebiliriz. (Somadaki olayın temsili)
+
+		Client serverın ortak kullanım için memoryden aldığı, memory bloklarına bağlanmak için ortak adres üzerinden bağlanacak
+		şekilde gerekli düzenlemeleri yapıyor.Gerekli ilklendirmeleri yapıyor.Daha sonra,dosya işlemleri için,oluştıurduğum birinci
+		semafora griyor.Bu bölümde istek sayısı path sayısından küçük ise istediği kadar alıyor.istek sayısı büyük ise geriye
+		kalan tüm pathleri alıyor.
+		Client aldığı bu pathleri klasör ve dosya olarak ayırıp iki farklı arrayde tutuyor.Daha sonra Klasörlerin aldındaki 
+		pathleri bulup geri memory bloğundaki path arrayine yazıyor ve update ediyor size.
+
+		Daha sonra bulduğu dosya sayısı kadar thread oluşturyor.Ve mutex yapısı içinde her bir dosya içindeki kelimelri
+		buluyor.Ayrıca kelime işlemleri içinde farklı isimde bir semafor daha kullandım.Biri kelime işlemlerini
+		yaparken,diğer client bağlanmasın diye.
+
+		Daha sonra client bulduğu bu kelimeleri memory bloğundaki kelime arrayi ile kıyaslıyor.Kelime varsa arraye
+		kelime eklemiyor.Her kelime için istenen miktarda parasını alıp gidiyor.Kelime yoksa,bu kelimeyi arraye ekliyor
+		ve gerekli miktarda parasını alıyor ve işlemini bitiriyor.
+
+
+		NOT: Dosya işlemlerinde sürekli güncelleme yapıldığı için her client farklı bir dosya üzerinden işlem yapıyor.
+		     Bunun için isimli semafor1 kullanıldı.
+
+	

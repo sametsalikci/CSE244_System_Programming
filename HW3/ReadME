@@ -1,0 +1,4 @@
+NOTE:
+
+	Programı çalıştırırken içinde bulunduğumuz klasörü verdiğimizde herhangi bir sorun çıkmıyor,fakat içinde çalıştığımız
+klasördeki herhangi bir klasörü arguman olarak verdiğimizde bir takım sıkıntılar oluşuyor.
